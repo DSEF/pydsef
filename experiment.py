@@ -59,7 +59,7 @@ class Experiment:
             for f in sum([glob.glob(s) for s in files], []):
                 scp.put(f, remote_path = '~/{}/dsef'.format(self.dist_sys))
 
-    def archive_files(self, *files):
+    def set_archive(self, *files):
         self.archive_files += files
 
     def add_experiments(self, configuration_dict):
