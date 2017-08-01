@@ -58,6 +58,7 @@ class Registry:
         server = ThreadedServer(cls, port = 18861, protocol_config = {'allow_pickle':True})
         print("Starting RPyC Server...")
         server.start()
+        return cls
 
 class Service(rpyc.Service):
     def on_connect(self, *args, **kwargs):
