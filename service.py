@@ -50,8 +50,7 @@ class Registry:
         def archive(self, *filenames):
             output = []
             for fn in filenames:
-                output.append(os.getcwd())
-                # shutil.make_archive(fn, 'gztar', root_dir='gcc')
+                output.append(shutil.make_archive(fn, 'gztar', base_dir=fn))
             return output
 
         cls.exposed_archive = archive
