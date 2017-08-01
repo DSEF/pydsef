@@ -1,6 +1,5 @@
 import rpyc
 import sys
-import yaml
 import glob
 import pickle
 import logging
