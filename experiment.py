@@ -23,6 +23,7 @@ class Experiment:
         self.port = port
         self.max_retries = max_retries
         self.client = None
+        self.archive_files = []
         self.exec_path = "run.py"
         self.conf = conf
         self.experiment_list = util.product(conf['experiment'])
@@ -57,6 +58,9 @@ class Experiment:
         with SCPClient(self.client.get_transport()) as scp:
             for f in sum([glob.glob(s) for s in files], []):
                 scp.put(f, remote_path = '~/{}/dsef'.format(self.dist_sys))
+
+    def archive_files(self, *files):
+        self.archive_files += files
 
     def add_experiments(self, configuration_dict):
         print("[+] Not yet implemented")
@@ -128,8 +132,9 @@ class Experiment:
 
     def end(self):
         print("[+] Exiting")
+        print(self.r.archive(*self.archive_files))
         self.conn.close()
-        self.exec_command("rm dsef/* log/*") # TODO: Archive
+        # self.exec_command("rm dsef/* log/*") # TODO: Archive
         self.server_io = None
         self.client.close()
 
