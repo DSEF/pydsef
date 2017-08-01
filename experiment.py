@@ -1,6 +1,5 @@
 import rpyc
 import sys
-import yaml
 import glob
 import pickle
 import logging
@@ -28,7 +27,8 @@ class Experiment:
         self.exec_path = "run.py"
         self.conf = conf
         self.experiment_list = util.product(conf['experiment'])
-        self.hosts = self.conf['host']
+        if('host' in conf): self.hosts = self.conf['host']
+        else: self.hosts = None
         for i, e in enumerate(self.experiment_list):
             e.update({'id':i})
             self.experiment_list[i] = e
@@ -104,7 +104,7 @@ class Experiment:
             print("[+] Launching")
             self.r.launch()
 
-            print("[+] Running for {} seconds".format(exp_dict['duration']))
+            print("[+] Running Experiment")
             self.results[exp_dict['id']] = pickle.loads(pickle.dumps(self.r.run()))
 
             print("[+] Tearing Down")
