@@ -27,7 +27,7 @@ class Experiment:
         self.exec_path = "run.py"
         self.conf = conf
         self.experiment_list = util.product(conf['experiment'])
-        self.hosts = self.conf['host']
+        if('host' in conf): self.hosts = self.conf['host']
         for i, e in enumerate(self.experiment_list):
             e.update({'id':i})
             self.experiment_list[i] = e
