@@ -1,10 +1,6 @@
 import rpyc
 from rpyc.utils.server import ThreadedServer
 
-def experiment(cls, port = 18861):
-    t = ThreadedServer(cls, port = port, protocol_config = {'allow_pickle':True})
-    print("Starting RPyC Server...")
-    t.start()
 
 class Registry:
     connect_list = []
@@ -13,6 +9,8 @@ class Registry:
     launch_list = []
     run_list = []
     teardown_list = []
+
+    server = None
 
     @staticmethod
     def connect(fun):
@@ -44,12 +42,18 @@ class Registry:
         Registry.teardown_list.append(fun)
         return fun
 
+    @staticmethod
+    def experiment(cls, port = 18861):
+        server = ThreadedServer(cls, port = 18861, protocol_config = {'allow_pickle':True})
+        print("Starting RPyC Server...")
+        server.start()
+
 class Service(rpyc.Service):
-    def on_connect(self):
+    def on_connect(self, *args, **kwargs):
         for f in Registry.connect_list:
             f(self, *args, **kwargs)
 
-    def on_disconnect(self):
+    def on_disconnect(self, *args, **kwargs):
         for f in Registry.disconnect_list:
             f(self, *args, **kwargs)
 
@@ -59,15 +63,15 @@ class Service(rpyc.Service):
         for f in Registry.setup_list:
             f(self, exp_dict, conf)
 
-    def exposed_launch(self):
+    def exposed_launch(self, *args, **kwargs):
         for f in Registry.launch_list:
             f(self, *args, **kwargs)
         pass
 
-    def exposed_run(self):
+    def exposed_run(self, *args, **kwargs):
         for f in Registry.run_list:
             f(self, *args, **kwargs)
 
-    def exposed_teardown(self):
+    def exposed_teardown(self, *args, **kwargs):
         for f in Registry.teardown_list:
             f(self, *args, **kwargs)
