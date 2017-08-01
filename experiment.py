@@ -7,7 +7,7 @@ import logging
 from scp import SCPClient
 from time import sleep
 from io import BufferedReader
-from dsef import util
+from pydsef import util
 
 import paramiko as ssh
 logging.getLogger("paramiko").setLevel(logging.WARNING)
