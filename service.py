@@ -1,6 +1,6 @@
 import rpyc
 from rpyc.utils.server import ThreadedServer
-
+import copy
 
 class Registry:
     connect_list = []
