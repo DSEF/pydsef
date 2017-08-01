@@ -7,6 +7,7 @@ from scp import SCPClient
 from time import sleep
 from io import BufferedReader
 from pydsef import util
+import copy
 
 import paramiko as ssh
 logging.getLogger("paramiko").setLevel(logging.WARNING)
@@ -139,7 +140,8 @@ class Experiment:
 
     def end(self):
         print("[+] Exiting")
-        self.pull_files(self.r.archive(*self.archive_files))
+        archives = copy.deepcopy(self.r.archive(*self.archive_files))
+        self.pull_files(archives)
         self.conn.close()
         # self.exec_command("rm dsef/* log/*") # TODO: Archive
         self.server_io = None
