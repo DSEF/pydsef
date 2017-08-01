@@ -2,6 +2,8 @@ import rpyc
 from rpyc.utils.server import ThreadedServer
 import copy
 import inspect
+import shutil
+import os
 
 class Registry:
     connect_list = []
@@ -12,7 +14,6 @@ class Registry:
     teardown_list = []
 
     server = None
-    server_file_name = None
 
     @staticmethod
     def connect(fun):
@@ -46,8 +47,15 @@ class Registry:
 
     @staticmethod
     def experiment(cls, port = 18861):
+        def archive(self, *filenames):
+            output = []
+            for fn in filenames:
+                output.append(os.getcwd())
+                # shutil.make_archive(fn, 'gztar', root_dir='gcc')
+            return output
+
+        cls.exposed_archive = archive
         server = ThreadedServer(cls, port = 18861, protocol_config = {'allow_pickle':True})
-        server_file_name = inspect.getfile(cls)
         print("Starting RPyC Server...")
         server.start()
 
