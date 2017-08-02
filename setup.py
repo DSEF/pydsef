@@ -8,5 +8,8 @@ setup(
     author_email = ["sgt43@cornell.edu", "yad999@gmail.com"],
     description = ("A python library that provides convience functions for DSEF"),
     packages = ['pydsef'],
-    url = 'https://github.com/DSEF'
+    url = 'https://github.com/DSEF',
+    license='MIT',
+    install_requires=['rpyc', 'scp', 'yaml'],
+    python_requires='>=3',
 }
