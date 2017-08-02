@@ -58,10 +58,10 @@ class Experiment:
         if self.client == None: self.exec_command("ls")
         with SCPClient(self.client.get_transport()) as scp:
             for f in sum([glob.glob(s) for s in files], []):
-                # scp.put(f, remote_path = '~/{}/dsef'.format(self.dist_sys))
                 if push:
                     scp.put(f, remote_path = '~/{}/dsef'.format(self.dist_sys))
                 else:
+                    print(f)
                     scp.get(f)
 
     def pull_files(self, files):
@@ -141,9 +141,8 @@ class Experiment:
     def end(self):
         print("[+] Exiting")
         archives = copy.deepcopy(self.r.archive(*self.archive_files))
-        self.pull_files(archives)
+        self.pull_files(archives + ['random'])
         self.conn.close()
-        # self.exec_command("rm dsef/* log/*") # TODO: Archive
         self.server_io = None
         self.client.close()
 
