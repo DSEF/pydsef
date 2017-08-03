@@ -37,7 +37,7 @@ class Registry:
 
     @staticmethod
     def run(fun):
-        if Reigstry.run_fun == None:
+        if Registry.run_fun == None:
             Registry.run_fun = fun
         else:
             raise Exception
