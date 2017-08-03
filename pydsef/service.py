@@ -10,7 +10,7 @@ class Registry:
     disconnect_list = []
     setup_list = []
     launch_list = []
-    run_list = []
+    run_fun = None
     teardown_list = []
 
     server = None
@@ -37,7 +37,10 @@ class Registry:
 
     @staticmethod
     def run(fun):
-        Registry.run_list.append(fun)
+        if Reigstry.run_fun == None:
+            Registry.run_fun = fun
+        else:
+            raise Exception
         return fun
 
     @staticmethod
@@ -77,11 +80,11 @@ class Service(rpyc.Service):
     def exposed_launch(self, *args, **kwargs):
         for f in Registry.launch_list:
             f(self, *args, **kwargs)
-        pass
 
     def exposed_run(self, *args, **kwargs):
-        for f in Registry.run_list:
-            f(self, *args, **kwargs)
+        res = Registry.run_fun(self, *args, **kwargs)
+        print("exposed_run: ", res)
+        return res
 
     def exposed_teardown(self, *args, **kwargs):
         for f in Registry.teardown_list:

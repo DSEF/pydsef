@@ -57,12 +57,12 @@ class Experiment:
 
         if self.client == None: self.exec_command("ls")
         with SCPClient(self.client.get_transport()) as scp:
-            for f in sum([glob.glob(s) for s in files], []):
-                if push:
+            if push:
+                for f in sum([glob.glob(s) for s in files], []):
                     scp.put(f, remote_path = '~/{}/dsef'.format(self.dist_sys))
-                else:
-                    print(f)
-                    scp.get(f)
+            else:
+                for f in files:
+                    scp.get("~/{}/{}".format(self.dist_sys, f), local_path = 'archives/{}'.format(f))
 
     def pull_files(self, files):
         self.transfer_files(files, push = False)
@@ -109,7 +109,7 @@ class Experiment:
     def start(self, exp_dict):
         self.server_io = None
         try:
-            print("[+] Starting Experiment {}".format(exp_dict['id']))
+            print("[+] Starting Experiment {}/{}".format(exp_dict['id'] + 1, len(self.experiment_list)))
             self.r.setup(exp_dict, self.hosts)
 
             print("[+] Launching")
@@ -141,7 +141,7 @@ class Experiment:
     def end(self):
         print("[+] Exiting")
         archives = copy.deepcopy(self.r.archive(*self.archive_files))
-        self.pull_files(archives + ['random'])
+        self.pull_files(archives)
         self.conn.close()
         self.server_io = None
         self.client.close()
