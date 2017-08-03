@@ -116,7 +116,7 @@ class Experiment:
             self.r.launch()
 
             print("[+] Running Experiment")
-            self.results[exp_dict['id']] = pickle.loads(pickle.dumps(self.r.run()))
+            self.results[exp_dict['id']] = copy.deepcopy(self.r.run())
 
             print("[+] Tearing Down")
             self.r.teardown()

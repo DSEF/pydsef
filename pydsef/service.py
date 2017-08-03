@@ -82,9 +82,7 @@ class Service(rpyc.Service):
             f(self, *args, **kwargs)
 
     def exposed_run(self, *args, **kwargs):
-        res = Registry.run_fun(self, *args, **kwargs)
-        print("exposed_run: ", res)
-        return res
+        return Registry.run_fun(self, *args, **kwargs)
 
     def exposed_teardown(self, *args, **kwargs):
         for f in Registry.teardown_list:
