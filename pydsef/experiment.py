@@ -58,7 +58,6 @@ class Experiment:
 
     def transfer_files(self, files, push = True, path = ""):
         print("[+] Transfering files: {}".format(files))
-        print(path)
 
         if not isinstance(files, list):
             files = [files]
