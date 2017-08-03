@@ -49,7 +49,7 @@ class Experiment:
         else:
             return (stdin, stdout, stderr)
 
-    def transfer_files(self, files, push = True):
+    def transfer_files(self, files, push = True, path = ""):
         print("[+] Transfering files: {}".format(files))
 
         if not isinstance(files, list):
@@ -59,19 +59,25 @@ class Experiment:
         with SCPClient(self.client.get_transport()) as scp:
             if push:
                 for f in sum([glob.glob(s) for s in files], []):
-                    scp.put(f, remote_path = '~/{}/dsef'.format(self.dist_sys))
+                    scp.put(f, remote_path = path.format(f=f))
             else:
                 for f in files:
-                    scp.get("~/{}/{}".format(self.dist_sys, f), local_path = 'archives/{}'.format(f))
-
-    def pull_files(self, files):
-        self.transfer_files(files, push = False)
+                    scp.get("~/{}/{}".format(self.dist_sys, f), local_path = path.format(f=f))
 
     def push_files(self, files):
-        self.transfer_files(files, push = True)
+        self.transfer_files(files, push = True, path = "~/{}/dsef".format(self.dist_sys))
+
+    def pull_archives(self, files):
+        pathname = make_archive_dir()
+        self.transfer_files(files, push = False, path = pathname + '/{f}')
 
     def set_archive(self, *files):
         self.archive_files += files
+
+    def make_archive_dir(self):
+        s = 'archive/{}'.format(datetime.datetime.now().strftime('%y%m%d-%H%M'))
+        os.makedirs(s, exist_ok = True)
+        return s
 
     def set_executable(self, path):
         self.exec_path = path
