@@ -8,6 +8,8 @@ from time import sleep
 from io import BufferedReader
 from pydsef import util
 import copy
+import datetime
+import os
 
 import paramiko as ssh
 logging.getLogger("paramiko").setLevel(logging.WARNING)
@@ -53,7 +55,7 @@ class Experiment:
         self.transfer_files(files, push = True, path = "~/{}/dsef".format(self.dist_sys))
 
     def pull_archives(self, files):
-        pathname = make_archive_dir()
+        pathname = self.make_archive_dir()
         self.transfer_files(files, push = False, path = pathname + '/{f}')
 
     def transfer_files(self, files, push = True, path = ""):
