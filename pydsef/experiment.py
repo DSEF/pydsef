@@ -49,8 +49,16 @@ class Experiment:
         else:
             return (stdin, stdout, stderr)
 
+    def push_files(self, files):
+        self.transfer_files(files, push = True, path = "~/{}/dsef".format(self.dist_sys))
+
+    def pull_archives(self, files):
+        pathname = make_archive_dir()
+        self.transfer_files(files, push = False, path = pathname + '/{f}')
+
     def transfer_files(self, files, push = True, path = ""):
         print("[+] Transfering files: {}".format(files))
+        print(path)
 
         if not isinstance(files, list):
             files = [files]
@@ -64,13 +72,6 @@ class Experiment:
                 for f in files:
                     scp.get("~/{}/{}".format(self.dist_sys, f), local_path = path.format(f=f))
 
-    def push_files(self, files):
-        self.transfer_files(files, push = True, path = "~/{}/dsef".format(self.dist_sys))
-
-    def pull_archives(self, files):
-        pathname = make_archive_dir()
-        self.transfer_files(files, push = False, path = pathname + '/{f}')
-
     def set_archive(self, *files):
         self.archive_files += files
 
@@ -81,7 +82,7 @@ class Experiment:
 
     def set_executable(self, path):
         self.exec_path = path
-        self.transfer_files(self.exec_path)
+        self.push_files(self.exec_path)
 
     def run(self):
         self.init()
@@ -147,7 +148,7 @@ class Experiment:
     def end(self):
         print("[+] Exiting")
         archives = copy.deepcopy(self.r.archive(*self.archive_files))
-        self.pull_files(archives)
+        self.pull_archives(archives)
         self.conn.close()
         self.server_io = None
         self.client.close()
