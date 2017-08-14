@@ -93,41 +93,38 @@ class Experiment:
         return self.end()
 
     def init(self):
-        print("[+] Connecting ... ", end="")
-        self.conn = None
-        i = 0
-        while self.conn == None:
-            try:
-                self.conn = rpyc.connect(self.hostname, self.port, config={'sync_request_timeout':60, 'allow_pickle':True})
-                break
-            except ConnectionRefusedError:
-                if i >= self.max_retries:
-                    print("FAIL")
-                    raise ConnectionError
-                else:
-                    self.server_io = self.exec_command("./dsef/{}".format(self.exec_path), block = False)
-                    sleep(0.5)
-            i += 1
+        def f():
+            self.conn = None
+            i = 0
+            while self.conn == None:
+                try:
+                    self.conn = rpyc.connect(self.hostname, self.port, config={'sync_request_timeout':60, 'allow_pickle':True})
+                    break
+                except ConnectionRefusedError:
+                    if i >= self.max_retries:
+                        print("FAIL")
+                        raise ConnectionError
+                    else:
+                        self.server_io = self.exec_command("./dsef/{}".format(self.exec_path), block = False)
+                        sleep(0.5)
+                i += 1
 
-        self.r = self.conn.root
-        print("Done")
-
-        self.results = {}
+            self.r = self.conn.root
+            self.results = {}
+        util.show_progress(f, 'Connecting')
 
     def start(self, exp_dict):
-        self.server_io = None
         try:
             print("[+] Starting Experiment {}/{}".format(exp_dict['id'] + 1, len(self.experiment_list)))
-            self.r.setup(exp_dict, self.hosts)
+            util.show_progress(self.r.setup, 'Setup', args = (exp_dict, self.hosts))
 
-            print("[+] Launching")
-            self.r.launch()
+            util.show_progress(self.r.launch, 'Launching')
 
-            print("[+] Running Experiment")
-            self.results[exp_dict['id']] = copy.deepcopy(self.r.run())
+            self.results[exp_dict['id']] = copy.deepcopy(util.show_progress(self.r.run, 'Running Experiment'))
 
-            print("[+] Tearing Down")
-            self.r.teardown()
+            util.show_progress(self.r.teardown, 'Tearing Down')
+
+            # print(self.server_io[0].read())
 
         except Exception as e:
             print("[+] There was an exception while running experiment {}!!".format(exp_dict['id']))
