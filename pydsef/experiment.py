@@ -36,6 +36,9 @@ class Experiment:
             e.update({'id':i})
             self.experiment_list[i] = e
 
+        # options
+        self.show_log = False
+
     def exec_command(self, cmd, block = True):
         if self.client == None:
             self.client = ssh.SSHClient()
@@ -57,6 +60,7 @@ class Experiment:
     def pull_archives(self, files):
         pathname = self.make_archive_dir()
         self.transfer_files(files, push = False, path = pathname + '/{f}')
+        [self.exec_command('rm {}'.format(f)) for f in files]
 
     def transfer_files(self, files, push = True, path = ""):
         print("[+] Transfering files: {}".format(files))
@@ -113,6 +117,12 @@ class Experiment:
             self.results = {}
         util.show_progress(f, 'Connecting')
 
+    def read(self):
+        data = b''
+        while self.server_io[1].channel.recv_ready():
+            data += self.server_io[1].read(1)
+        return data
+
     def start(self, exp_dict):
         try:
             print("[+] Starting Experiment {}/{}".format(exp_dict['id'] + 1, len(self.experiment_list)))
@@ -122,9 +132,11 @@ class Experiment:
 
             self.results[exp_dict['id']] = copy.deepcopy(util.show_progress(self.r.run, 'Running Experiment'))
 
-            util.show_progress(self.r.teardown, 'Tearing Down')
+            if self.show_log:
+                print('[+] Experiment Log:')
+                print(str(self.read(), 'ascii'))
 
-            # print(self.server_io[0].read())
+            util.show_progress(self.r.teardown, 'Tearing Down')
 
         except Exception as e:
             print("[+] There was an exception while running experiment {}!!".format(exp_dict['id']))
