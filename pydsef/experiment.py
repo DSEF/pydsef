@@ -26,6 +26,7 @@ class Experiment:
         self.port = port
         self.max_retries = max_retries
         self.client = None
+        self.timestamp = None
         self.archive_files = []
         self.exec_path = "run.py"
         self.conf = conf
@@ -38,6 +39,7 @@ class Experiment:
 
         # options
         self.show_log = False
+        self.save_log = True
 
     def exec_command(self, cmd, block = True):
         if self.client == None:
@@ -58,9 +60,17 @@ class Experiment:
         self.transfer_files(files, push = True, path = "~/{}/dsef".format(self.dist_sys))
 
     def pull_archives(self, files):
-        pathname = self.make_archive_dir()
+        pathname = self.make_timestamped_dir('archive')
         self.transfer_files(files, push = False, path = pathname + '/{f}')
         [self.exec_command('rm {}'.format(f)) for f in files]
+
+    def write_log(self, exp_id, stdout, stderr):
+        pathname = self.make_timestamped_dir('logs')
+        with open('{}/{}.{}'.format(pathname, exp_id, 'out'), mode = 'wb') as f:
+            f.write(stdout)
+
+        with open('{}/{}.{}'.format(pathname, exp_id, 'err'), mode = 'wb') as f:
+            f.write(stderr)
 
     def transfer_files(self, files, push = True, path = ""):
         if not isinstance(files, list):
@@ -77,13 +87,12 @@ class Experiment:
                         scp.get("~/{}/{}".format(self.dist_sys, f), local_path = path.format(f=f))
 
         util.show_progress(f, 'Transfering files: {}'.format(', '.join(files)))
-        # print("[+] Transfering files: {}".format(', '.join(files)))
 
     def set_archive(self, *files):
         self.archive_files += files
 
-    def make_archive_dir(self):
-        s = 'archive/{}'.format(datetime.datetime.now().strftime('%y%m%d-%H%M'))
+    def make_timestamped_dir(self, name):
+        s = '{}/{}'.format(name, self.timestamp)
         os.makedirs(s, exist_ok = True)
         return s
 
@@ -92,13 +101,17 @@ class Experiment:
         self.push_files(self.exec_path)
 
     def run(self):
-        self.init()
+        self.connect()
         print('[+] Running {} Experiments'.format(len(self.experiment_list)))
+
+        self.timestamp = datetime.datetime.now().strftime('%m%d%y-%H%M')
+        print('[+] Timestamp: {}'.format(self.timestamp))
+
         for e in self.experiment_list:
             if not self.start(e): break
         return self.end()
 
-    def init(self):
+    def connect(self):
         def f():
             self.conn = None
             i = 0
@@ -120,10 +133,15 @@ class Experiment:
         util.show_progress(f, 'Connecting')
 
     def read(self):
-        data = b''
+        stdout = b''
         while self.server_io[1].channel.recv_ready():
-            data += self.server_io[1].read(1)
-        return data
+            stdout += self.server_io[1].read(1)
+
+        stderr = b''
+        while self.server_io[2].channel.recv_ready():
+            stderr += self.server_io[2].read(1)
+
+        return (stdout, stderr)
 
     def start(self, exp_dict):
         try:
@@ -134,11 +152,15 @@ class Experiment:
 
             self.results[exp_dict['id']] = copy.deepcopy(util.show_progress(self.r.run, 'Running Experiment'))
 
-            if self.show_log:
-                print('[+] Experiment Log:')
-                print(str(self.read(), 'ascii'))
-
             util.show_progress(self.r.teardown, 'Tearing Down')
+
+            (stdout, stderr) = self.read()
+            if self.show_log:
+                print('[+] Experiment Log:', flush = True)
+                print(str(stdout, 'ascii'), file = sys.stderr, flush = True)
+
+            if self.save_log:
+                util.show_progress(self.write_log, 'Saving logs', args = (exp_dict['id'], stdout, stderr,))
 
         except Exception as e:
             print("[+] There was an exception while running experiment {}!!".format(exp_dict['id']))
