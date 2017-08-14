@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name = "pydsef",
-    version = "0.1.2",
+    version = "0.2.0",
     author = "Samuel Thomas",
     author_email = "sgt43@cornell.edu",
     description = ("A python library that provides convience functions for DSEF"),
