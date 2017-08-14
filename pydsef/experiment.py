@@ -63,19 +63,21 @@ class Experiment:
         [self.exec_command('rm {}'.format(f)) for f in files]
 
     def transfer_files(self, files, push = True, path = ""):
-        print("[+] Transfering files: {}".format(files))
-
         if not isinstance(files, list):
             files = [files]
 
-        if self.client == None: self.exec_command("ls")
-        with SCPClient(self.client.get_transport()) as scp:
-            if push:
-                for f in sum([glob.glob(s) for s in files], []):
-                    scp.put(f, remote_path = path.format(f=f))
-            else:
-                for f in files:
-                    scp.get("~/{}/{}".format(self.dist_sys, f), local_path = path.format(f=f))
+        def f():
+            if self.client == None: self.exec_command("ls")
+            with SCPClient(self.client.get_transport()) as scp:
+                if push:
+                    for f in sum([glob.glob(s) for s in files], []):
+                        scp.put(f, remote_path = path.format(f=f))
+                else:
+                    for f in files:
+                        scp.get("~/{}/{}".format(self.dist_sys, f), local_path = path.format(f=f))
+
+        util.show_progress(f, 'Transfering files: {}'.format(', '.join(files)))
+        # print("[+] Transfering files: {}".format(', '.join(files)))
 
     def set_archive(self, *files):
         self.archive_files += files
