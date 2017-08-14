@@ -1,5 +1,5 @@
 # PyDSEF
-A python module that provides the python interface of dsef. Here is a template of how to use this: [python-dsef](https://github.com/DSEF/dsef-python)
+A python module that provides the python interface of dsef. Here is a template of how to use this: [dsef-template](https://github.com/DSEF/dsef-template)
 
 ## Installing
 You can install with: `pip3 install pydsef`, or if you are developing `python3 setup.py install`

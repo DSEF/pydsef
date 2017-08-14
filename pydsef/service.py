@@ -57,7 +57,7 @@ class Registry:
             return output
 
         cls.exposed_archive = archive
-        server = ThreadedServer(cls, port = 18861, protocol_config = {'allow_pickle':True})
+        server = ThreadedServer(cls, port = port, protocol_config = {'allow_pickle':True})
         print("Starting RPyC Server...")
         server.start()
         return cls
