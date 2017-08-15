@@ -40,6 +40,7 @@ class Experiment:
         # options
         self.show_log = False
         self.save_log = True
+        # for future: self.save_results = True
 
     def exec_command(self, cmd, block = True):
         if self.client == None:
@@ -60,7 +61,7 @@ class Experiment:
         self.transfer_files(files, push = True, path = "~/{}/dsef".format(self.dist_sys))
 
     def pull_archives(self, files):
-        pathname = self.make_timestamped_dir('archive')
+        pathname = self.make_timestamped_dir('archives')
         self.transfer_files(files, push = False, path = pathname + '/{f}')
         [self.exec_command('rm {}'.format(f)) for f in files]
 
@@ -92,7 +93,7 @@ class Experiment:
         self.archive_files += files
 
     def make_timestamped_dir(self, name):
-        s = '{}/{}'.format(name, self.timestamp)
+        s = 'results/{}/{}'.format(self.timestamp, name)
         os.makedirs(s, exist_ok = True)
         return s
 
