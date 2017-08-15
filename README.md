@@ -1,4 +1,5 @@
 # PyDSEF
+[![PyPI version](https://badge.fury.io/py/pydsef.svg)](https://badge.fury.io/py/pydsef)  
 A python module that provides the python interface of dsef. Here is a template of how to use this: [dsef-template](https://github.com/DSEF/dsef-template)
 
 ## Installing
