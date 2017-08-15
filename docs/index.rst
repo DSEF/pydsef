@@ -11,8 +11,9 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   util
-   experiment
+   modules/experiment
+   modules/service
+   modules/util
 
 Indices and tables
 ==================
