@@ -16,13 +16,15 @@ class Included:
         return self.__str__()
 
 class DSEFLoader(yaml.Loader):
-    """Custom YAML Loader with the !include tag to mark changing parameters in experiments."""
+    """Custom YAML Loader with the !include tag to mark parameters that change with each trial"""
     @staticmethod
     def init():
+        """Initiliazes the YAML loader. This gets called in __init__.py when pydsef is imported."""
         DSEFLoader.add_constructor("!include", DSEFLoader.include)
 
     @staticmethod
     def include(loader, node):
+        """Returns the YAML load wrapped in the Inlucded class."""
         return Included(loader.construct_sequence(node))
 
 def product(d):

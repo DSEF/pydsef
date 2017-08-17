@@ -7,7 +7,7 @@ Welcome to pydsef's documentation!
 ==================================
 
 Contents
-================
+========
 .. toctree::
    :maxdepth: 2
 
