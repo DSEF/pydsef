@@ -63,6 +63,7 @@ class Registry:
         return cls
 
 class Service(rpyc.Service):
+    """Base class for the experimental run object"""
     def on_connect(self, *args, **kwargs):
         for f in Registry.connect_list:
             f(self, *args, **kwargs)
@@ -72,8 +73,11 @@ class Service(rpyc.Service):
             f(self, *args, **kwargs)
 
     def exposed_setup(self, exp_dict, conf):
+        """Used as a wrapper function for the setup call defined in run.py. Additionally, defines member variables using the exp_dict"""
         exp_dict = copy.deepcopy(exp_dict)
         conf = copy.deepcopy(conf)
+        for key in exp_dict:
+            setattr(self, key, exp_dict[key])
         for f in Registry.setup_list:
             f(self, exp_dict, conf)
 
