@@ -19,7 +19,7 @@ r = None
 results = {}
 
 class Experiment:
-    """Class to configure and run experiments"""
+    """Class to configure and run experiments."""
     def __init__(self, hostname, username, dist_sys, conf, port = 18861, max_retries = 10):
         self.hostname = hostname
         self.username = username
@@ -61,14 +61,17 @@ class Experiment:
             return (stdin, stdout, stderr)
 
     def push_files(self, files):
+        """Pushes files to the master node from the Jupyter server."""
         self.transfer_files(files, push = True, path = "~/{}/dsef".format(self.dist_sys))
 
     def pull_archives(self, files):
+        """Pulls archives created on the master node into a timestamped 'archives' directory on the Jupyter server."""
         pathname = self.make_timestamped_dir('archives')
         self.transfer_files(files, push = False, path = pathname + '/{f}')
         [self.exec_command('rm {}'.format(f)) for f in files]
 
     def write_log(self, exp_id, stdout, stderr):
+        """Writes stdout and stderr to files in a timestamped 'logs' directory. """
         pathname = self.make_timestamped_dir('logs')
         with open('{}/{}.{}'.format(pathname, exp_id, 'out'), mode = 'wb') as f:
             f.write(stdout)
@@ -77,6 +80,7 @@ class Experiment:
             f.write(stderr)
 
     def transfer_files(self, files, push = True, path = ""):
+        """Transfers files between master node and the Jupyter server."""
         if not isinstance(files, list):
             files = [files]
 
@@ -93,18 +97,22 @@ class Experiment:
         util.show_progress(f, 'Transfering files: {}'.format(', '.join(files)))
 
     def set_archive(self, *files):
+        """Sets the names of files to be archived and the end of the experiment."""
         self.archive_files += files
 
     def make_timestamped_dir(self, name):
+        """Makes a directory with a timestamp that is used for storing logs and archives from an experiment."""
         s = 'results/{}/{}'.format(self.timestamp, name)
         os.makedirs(s, exist_ok = True)
         return s
 
     def set_executable(self, path):
+        """Sets the name of the file with an Experiment Service."""
         self.exec_path = path
         self.push_files(self.exec_path)
 
     def run(self):
+        """Run the experiment."""
         self.connect()
         print('[+] Running {} Experiments'.format(len(self.experiment_list)))
 
@@ -116,6 +124,7 @@ class Experiment:
         return self.end()
 
     def connect(self):
+        """Establish an RPyC connection with the master node."""
         def f():
             self.conn = None
             i = 0
@@ -137,6 +146,7 @@ class Experiment:
         util.show_progress(f, 'Connecting')
 
     def read(self):
+        """Read all output from the stdout and stderr of the RPyC server running on the master node."""
         stdout = b''
         while self.server_io[1].channel.recv_ready():
             stdout += self.server_io[1].read(1)
@@ -148,6 +158,7 @@ class Experiment:
         return (stdout, stderr)
 
     def start(self, exp_dict):
+        """Start an individual trial in an experiment."""
         try:
             print("[+] Starting Experiment {}/{}".format(exp_dict['id'] + 1, len(self.experiment_list)))
             util.show_progress(self.r.setup, 'Setup', args = (exp_dict, self.hosts))
@@ -184,6 +195,7 @@ class Experiment:
         return True
 
     def end(self):
+        """Finish the experiment and return the results gathered during the experiment."""
         print("[+] Exiting")
         archives = copy.deepcopy(self.r.archive(*self.archive_files))
         self.pull_archives(archives)
