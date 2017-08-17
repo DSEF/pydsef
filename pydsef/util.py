@@ -4,8 +4,8 @@ import threading
 from time import sleep
 from queue import Queue
 
-'''Custom YAML Loader / Tag'''
 class Included:
+    """Custom list object for use in DSEFLoader."""
     def __init__(self, l):
         self.lst = l
 
@@ -16,6 +16,7 @@ class Included:
         return self.__str__()
 
 class DSEFLoader(yaml.Loader):
+    """Custom YAML Loader with the !include tag to mark changing parameters in experiments."""
     @staticmethod
     def init():
         DSEFLoader.add_constructor("!include", DSEFLoader.include)
@@ -25,6 +26,7 @@ class DSEFLoader(yaml.Loader):
         return Included(loader.construct_sequence(node))
 
 def product(d):
+    """Returns a list of dictionaries that represent the product of all the values marked with !include."""
     result = [{}]
 
     def add_dict(d1, d2):
@@ -41,6 +43,7 @@ def product(d):
     return result
 
 def show_progress(fun, msg, args = (), rate = 0.3):
+    """Displays a spinner while the given function is running."""
     q = Queue()
     def new_fun(q, a):
         q.put(fun(*a))

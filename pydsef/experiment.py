@@ -19,6 +19,7 @@ r = None
 results = {}
 
 class Experiment:
+    """Class to configure and run experiments"""
     def __init__(self, hostname, username, dist_sys, conf, port = 18861, max_retries = 10):
         self.hostname = hostname
         self.username = username
@@ -43,6 +44,8 @@ class Experiment:
         # for future: self.save_results = True
 
     def exec_command(self, cmd, block = True):
+        """Executes a command on the master node. If block is True, wait until command finishes and return stdout,
+        otherwise exit immediately and return (stdin, stdout, stderr)"""
         if self.client == None:
             self.client = ssh.SSHClient()
             self.client.load_system_host_keys()
